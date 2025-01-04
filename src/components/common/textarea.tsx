@@ -38,7 +38,11 @@ export default function Textarea({ value, setValue }: Props) {
         className="aspect-square w-full rounded-lg bg-[#262626] p-5"
         onFocus={handleFocus}
         onBlur={() => setIsFocused(false)}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => {
+                             console.log("Event object:", e); // 이벤트 객체 자체를 출력
+                             console.log("Current input value:", e.target.value); // 입력된 값 출력
+                             setValue(e.target.value); // 상태 업데이트
+                           }}
         value={value}
       />
     </div>

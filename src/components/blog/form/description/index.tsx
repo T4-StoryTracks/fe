@@ -4,7 +4,8 @@ import "swiper/css";
 import "swiper/css/free-mode";
 
 import { FreeMode } from "swiper/modules";
-import { useRef, useState } from "react";
+//import { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import Microphone from "@/components/icons/microphone";
 import Magic from "@/components/icons/magic";
 import Thumbnail from "@/components/common/thumbnail";
@@ -57,6 +58,63 @@ export default function DescriptionForm() {
     setActiveComponentKey("preview");
   };
 
+const SpeechToText = () => {
+  const recognitionRef = useRef(null);
+
+  // 컴포넌트 마운트 시 recognition 초기화
+  useEffect(() => {
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = "en-US";
+
+      recognition.onresult = (event) => {
+        const transcript = Array.from(event.results)
+          .map((result) => result[0].transcript)
+          .join("");
+        console.log("Transcript:", transcript);
+        //setValue(transcript); // 부모 상태 업데이트
+      };
+
+      recognition.onerror = (event) => {
+        console.error("Speech recognition error:", event.error);
+      };
+
+      recognitionRef.current = recognition;
+    } else {
+      console.error("Speech Recognition API is not supported in this browser.");
+    }
+  }, []);
+
+  const startListening = () => {
+    if (recognitionRef.current) {
+      console.log("Starting recognition...");
+      recognitionRef.current.start();
+    } else {
+      console.error("SpeechRecognition is not initialized.");
+    }
+  };
+
+  const stopListening = () => {
+    if (recognitionRef.current) {
+      console.log("Stopping recognition...");
+      recognitionRef.current.stop();
+    } else {
+      console.error("SpeechRecognition is not initialized.");
+    }
+  };
+
+  return (
+    <div>
+      <button onClick={startListening}>Start Listening</button>
+      <button onClick={stopListening}>Stop Listening</button>
+    </div>
+  );
+};
+
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden">
       <div className="bg-black-primary relative flex w-full flex-1 flex-col gap-4 overflow-y-auto pb-4">
@@ -92,6 +150,7 @@ export default function DescriptionForm() {
             <div className="flex justify-end gap-1">
               <Microphone />
               <span className="text-[13px]">Speech to Text</span>
+              <SpeechToText setValue={setValue} />
             </div>
           </div>
         )}
